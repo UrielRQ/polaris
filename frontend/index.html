@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>POLARIS</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-purple-50 min-h-screen p-6">
+
+  <div class="max-w-4xl mx-auto">
+
+    <h1 class="text-3xl font-bold mb-6 text-center text-purple-900">
+      Sistema POLARIS
+    </h1>
+
+    <!-- FORMULARIO -->
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-purple-300">
+      <h2 class="text-xl font-semibold mb-4 text-purple-700">
+        Registrar miembro
+      </h2>
+
+      <form id="formMiembro" class="space-y-4">
+
+        <input 
+          type="text" 
+          id="nombre" 
+          placeholder="Nombre"
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          required
+        >
+
+        <input 
+          type="email" 
+          id="correo" 
+          placeholder="Correo"
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          required
+        >
+
+        <input 
+          type="text" 
+          id="rol" 
+          placeholder="Rol"
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          required
+        >
+
+        <button 
+          type="submit"
+          class="w-full bg-purple-900 text-white py-2 rounded-lg hover:bg-purple-700 transition"
+        >
+          Registrar miembro
+        </button>
+
+      </form>
+    </div>
+
+    <!-- LISTA -->
+    <div>
+      <h2 class="text-xl font-semibold mb-4 text-purple-700">
+        Lista de miembros
+      </h2>
+
+      <div id="listaMiembros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <p class="text-sm text-purple-300 text-center mt-6">
+      POLARIS © 2026
+    </p>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
