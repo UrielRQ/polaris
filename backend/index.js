@@ -7,6 +7,8 @@ app.use(express.json());
 
 let miembros = []; // simulando base de datos
 
+let proyectos = []; // nueva "base de datos"
+
 // CREATE (POST)
 app.post('/miembros', (req, res) => {
     const { nombre, correo, rol } = req.body;
@@ -56,4 +58,38 @@ app.delete('/miembros/:id', (req, res) => {
     miembros = miembros.filter(m => m.id != id);
 
     res.json({ mensaje: 'Miembro eliminado' });
+});
+
+// CREATE PROYECTO
+app.post('/proyectos', (req, res) => {
+    const { nombre, tipo, fecha, descripcion, participantes } = req.body;
+
+    const nuevoProyecto = {
+        id: proyectos.length + 1,
+        nombre,
+        tipo,
+        fecha,
+        descripcion,
+        participantes // array de IDs de miembros
+    };
+
+    proyectos.push(nuevoProyecto);
+    res.json(nuevoProyecto);
+});
+
+// READ PROYECTOS
+app.get('/proyectos', (req, res) => {
+    // Opcional: enriquecer con info de miembros
+    const resultado = proyectos.map(p => {
+        const participantesInfo = miembros.filter(m =>
+            p.participantes.includes(m.id)
+        );
+
+        return {
+            ...p,
+            participantesInfo
+        };
+    });
+
+    res.json(resultado);
 });

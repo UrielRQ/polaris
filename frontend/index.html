@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>POLARIS</title>
-
-  <!-- Tailwind CDN -->
+  <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -16,8 +15,8 @@
       Sistema POLARIS
     </h1>
 
-    <!-- FORMULARIO -->
-    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-white">
+    <!-- FORMULARIO MIEMBRO -->
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-purple-100">
       <h2 class="text-xl font-semibold mb-4 text-purple-700">
         Registrar miembro
       </h2>
@@ -26,7 +25,7 @@
 
         <input 
           type="text" 
-          id="nombre" 
+          id="nombreMiembro" 
           placeholder="Nombre"
           class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
           required
@@ -58,13 +57,61 @@
       </form>
     </div>
 
-    <!-- LISTA -->
-    <div>
+    <!-- LISTA DE MIEMBROS -->
+    <div class="mb-10">
       <h2 class="text-xl font-semibold mb-4 text-purple-700">
         Lista de miembros
       </h2>
-
       <div id="listaMiembros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <!-- FORMULARIO PROYECTO -->
+    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-purple-100">
+      <h2 class="text-xl font-semibold mb-4 text-purple-700">Registrar proyecto</h2>
+
+      <div class="space-y-4">
+        <input 
+          id="nombreProyecto" 
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Nombre del proyecto"
+        >
+        <input 
+          id="tipo" 
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Tipo (proyecto, evento, hackathon…)"
+        >
+        <input 
+          id="fecha" 
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          type="date"
+        >
+        <textarea 
+          id="descripcion" 
+          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Descripción breve"
+          rows="3"
+        ></textarea>
+
+        <div>
+          <h3 class="text-sm font-semibold text-purple-700 mb-2">Seleccionar participantes</h3>
+          <div id="miembros" class="border border-purple-100 rounded-lg p-3 space-y-1 max-h-48 overflow-y-auto bg-purple-50">
+            <p class="text-sm text-gray-400">Registra miembros primero para poder seleccionarlos.</p>
+          </div>
+        </div>
+
+        <button 
+          class="w-full bg-purple-900 text-white py-2 rounded-lg hover:bg-purple-700 transition"
+          onclick="crearProyecto()"
+        >
+          Crear proyecto
+        </button>
+      </div>
+    </div>
+
+    <!-- LISTA DE PROYECTOS -->
+    <div class="mb-10">
+      <h2 class="text-xl font-semibold mb-4 text-purple-700">Lista de proyectos</h2>
+      <div id="lista"></div>
     </div>
 
     <p class="text-sm text-purple-300 text-center mt-6">
