@@ -93,3 +93,35 @@ app.get('/proyectos', (req, res) => {
 
     res.json(resultado);
 });
+// UPDATE PROYECTO
+app.put('/proyectos/:id', (req, res) => {
+    const { id } = req.params;
+    const { nombre, tipo, fecha, descripcion, participantes } = req.body;
+
+    const proyecto = proyectos.find(p => p.id == id);
+
+    if (!proyecto) {
+        return res.status(404).json({ error: 'Proyecto no encontrado' });
+    }
+
+    proyecto.nombre = nombre;
+    proyecto.tipo = tipo;
+    proyecto.fecha = fecha;
+    proyecto.descripcion = descripcion;
+    proyecto.participantes = participantes; // permite agregar/remover participantes
+
+    res.json(proyecto);
+});
+
+// DELETE PROYECTO
+app.delete('/proyectos/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = proyectos.findIndex(p => p.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({ error: 'Proyecto no encontrado' });
+    }
+
+    proyectos.splice(index, 1);
+    res.json({ mensaje: 'Proyecto eliminado' });
+});

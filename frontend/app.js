@@ -1,6 +1,7 @@
 const form = document.getElementById('formMiembro');
 
 let editandoId = null;
+let editandoProyectoId = null;
 
 // SUBMIT (CREATE o UPDATE)
 form.addEventListener('submit', async (e) => {
@@ -89,6 +90,7 @@ async function eliminar(id) {
     cargarMiembros();
 }
 
+
 // CREAR PROYECTO
 async function crearProyecto() {
     const checkboxes = document.querySelectorAll('input[type=checkbox]:checked');
@@ -102,11 +104,21 @@ async function crearProyecto() {
         participantes
     };
 
-    await fetch('http://localhost:3000/proyectos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
+    if (editandoProyectoId) {
+        await fetch(`http://localhost:3000/proyectos/${editandoProyectoId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        editandoProyectoId = null;
+        document.querySelector('#btnProyecto').textContent = 'Crear proyecto';
+    } else {
+        await fetch('http://localhost:3000/proyectos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    }
 
     document.getElementById('nombreProyecto').value = '';
     document.getElementById('tipo').value = '';
@@ -117,13 +129,36 @@ async function crearProyecto() {
     cargarProyectos();
 }
 
-// CARGAR PROYECTOS
+//EDITAR PROYECTO
+
+function editarProyecto(id, nombre, tipo, fecha, descripcion, participantes) {
+    document.getElementById('nombreProyecto').value = nombre;
+    document.getElementById('tipo').value = tipo;
+    document.getElementById('fecha').value = fecha;
+    document.getElementById('descripcion').value = descripcion;
+    editandoProyectoId = id;
+    document.querySelector('#btnProyecto').textContent = 'Guardar cambios';
+
+    // Marcar los participantes actuales en los checkboxes
+    document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => {
+        cb.checked = participantes.includes(parseInt(cb.value));
+    });
+}
+
+// ELIMINAR PROYECTO
+async function eliminarProyecto(id) {
+    if (!confirm('¿Eliminar este proyecto?')) return;
+    await fetch(`http://localhost:3000/proyectos/${id}`, { method: 'DELETE' });
+    cargarProyectos();
+}
+
+// CARGAR PROYECTOS 
 async function cargarProyectos() {
     const res = await fetch('http://localhost:3000/proyectos');
     const data = await res.json();
 
     const contenedor = document.getElementById('lista');
-    contenedor.innerHTML = "";
+    contenedor.innerHTML = '';
 
     data.forEach(p => {
         contenedor.innerHTML += `
@@ -134,6 +169,16 @@ async function cargarProyectos() {
                 <p class="text-sm font-semibold mt-2">Participantes:</p>
                 <div class="flex flex-wrap gap-2 mt-1">
                     ${p.participantesInfo.map(m => `<span class="badge">${m.nombre}</span>`).join('')}
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <button onclick="editarProyecto(${p.id}, '${p.nombre}', '${p.tipo}', '${p.fecha}', '${p.descripcion}', ${JSON.stringify(p.participantes)})"
+                        class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-lg hover:bg-purple-200 transition">
+                        Editar
+                    </button>
+                    <button onclick="eliminarProyecto(${p.id})"
+                        class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-lg hover:bg-red-200 transition">
+                        Eliminar
+                    </button>
                 </div>
             </div>
         `;
