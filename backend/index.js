@@ -11,13 +11,15 @@ let proyectos = []; // nueva "base de datos"
 
 // CREATE (POST)
 app.post('/miembros', (req, res) => {
-    const { nombre, correo, rol } = req.body;
+    const { nombre, correo, rol, telefono, fechaNacimiento } = req.body;
 
     const nuevo = {
         id: miembros.length + 1,
         nombre,
         correo,
-        rol
+        rol,
+        telefono,
+        fechaNacimiento
     };
 
     miembros.push(nuevo);
@@ -36,7 +38,7 @@ app.listen(3000, () => {
 // UPDATE (PUT)
 app.put('/miembros/:id', (req, res) => {
     const { id } = req.params;
-    const { nombre, correo, rol } = req.body;
+    const { nombre, correo, rol, telefono, fechaNacimiento } = req.body;
 
     const miembro = miembros.find(m => m.id == id);
 
@@ -47,6 +49,8 @@ app.put('/miembros/:id', (req, res) => {
     miembro.nombre = nombre;
     miembro.correo = correo;
     miembro.rol = rol;
+    miembro.telefono = telefono;
+    miembro.fechaNacimiento = fechaNacimiento;
 
     res.json(miembro);
 });

@@ -2,123 +2,323 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>POLARIS</title>
-  <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50:  '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card-anim { animation: fadeInUp 0.22s ease both; }
+    #modoBanner { transition: background-color 0.3s ease; }
+  </style>
 </head>
 
-<body class="bg-purple-50 min-h-screen p-6">
+<body class="bg-purple-50 min-h-screen">
 
-  <div class="max-w-4xl mx-auto">
-
-    <h1 class="text-3xl font-bold mb-6 text-center text-purple-900">
-      Sistema POLARIS
-    </h1>
-
-    <!-- FORMULARIO MIEMBRO -->
-    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-purple-100">
-      <h2 class="text-xl font-semibold mb-4 text-purple-700">
-        Registrar miembro
-      </h2>
-
-      <form id="formMiembro" class="space-y-4">
-
-        <input 
-          type="text" 
-          id="nombreMiembro" 
-          placeholder="Nombre"
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          required
-        >
-
-        <input 
-          type="email" 
-          id="correo" 
-          placeholder="Correo"
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          required
-        >
-
-        <input 
-          type="text" 
-          id="rol" 
-          placeholder="Rol"
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          required
-        >
-
-        <button 
-          type="submit"
-          class="w-full bg-purple-900 text-white py-2 rounded-lg hover:bg-purple-700 transition"
-        >
-          Registrar miembro
-        </button>
-
-      </form>
+  <!-- HEADER -->
+  <header class="bg-purple-900 text-white shadow-lg">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-300 flex-shrink-0"
+           fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 2l2.09 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l5.91-.91z"/>
+      </svg>
+      <div>
+        <h1 class="text-2xl font-bold tracking-wide leading-none">POLARIS</h1>
+        <p class="text-purple-300 text-xs mt-0.5 tracking-widest uppercase">Sistema de gestión de equipos</p>
+      </div>
     </div>
+  </header>
 
-    <!-- LISTA DE MIEMBROS -->
-    <div class="mb-10">
-      <h2 class="text-xl font-semibold mb-4 text-purple-700">
-        Lista de miembros
-      </h2>
-      <div id="listaMiembros" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </div>
+  <main class="max-w-5xl mx-auto px-6 py-8 space-y-10">
 
-    <!-- FORMULARIO PROYECTO -->
-    <div class="bg-white p-6 rounded-2xl shadow-md mb-8 border border-purple-100">
-      <h2 class="text-xl font-semibold mb-4 text-purple-700">Registrar proyecto</h2>
+    <!-- ===== SECCIÓN MIEMBROS ===== -->
+    <section>
+      <div class="flex items-center gap-2 mb-5">
+        <span class="w-1 h-6 bg-purple-600 rounded-full"></span>
+        <h2 class="text-lg font-bold text-purple-900 uppercase tracking-wide">Gestión de Miembros</h2>
+      </div>
 
-      <div class="space-y-4">
-        <input 
-          id="nombreProyecto" 
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          placeholder="Nombre del proyecto"
-        >
-        <input 
-          id="tipo" 
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          placeholder="Tipo (proyecto, evento, hackathon…)"
-        >
-        <input 
-          id="fecha" 
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          type="date"
-        >
-        <textarea 
-          id="descripcion" 
-          class="w-full border border-purple-200 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
-          placeholder="Descripción breve"
-          rows="3"
-        ></textarea>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
+        <!-- FORMULARIO MIEMBRO -->
+        <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+
+          <!-- Banner modo (registro / edición) -->
+          <div id="modoBanner" class="bg-purple-700 px-5 py-3 flex items-center justify-between">
+            <span id="tituloFormulario" class="text-white font-semibold text-sm">
+              ➕ Registrar nuevo miembro
+            </span>
+            <button id="btnCancelar" onclick="cancelarEdicion()"
+                    class="hidden text-purple-200 hover:text-white text-xs underline transition">
+              Cancelar edición
+            </button>
+          </div>
+
+          <form id="formMiembro" class="p-5 space-y-4">
+
+            <div class="flex flex-col gap-1">
+              <label for="nombreMiembro"
+                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                Nombre completo <span class="text-red-400">*</span>
+              </label>
+              <input type="text" id="nombreMiembro" placeholder="Ej. Ana García" autocomplete="off"
+                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                            focus:border-purple-400 transition" required>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label for="correo"
+                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                Correo electrónico <span class="text-red-400">*</span>
+              </label>
+              <input type="email" id="correo" placeholder="Ej. ana@polaris.dev" autocomplete="off"
+                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                            focus:border-purple-400 transition" required>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label for="rol"
+                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                Rol en el equipo <span class="text-red-400">*</span>
+              </label>
+              <input type="text" id="rol" placeholder="Ej. Frontend Developer" autocomplete="off"
+                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                            focus:border-purple-400 transition" required>
+            </div>
+
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1">
+                <label for="telefono"
+                  class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                  Numero telefonico <span class="text-red-400">*</span>
+                </label>
+                <input type="tel" id="telefono" placeholder="Ej. 5512345678" autocomplete="off"
+                  class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                    placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                    focus:border-purple-400 transition" required>
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <label for="fechaNacimiento"
+                  class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                  Fecha de nacimiento <span class="text-red-400">*</span>
+                </label>
+                <input type="date" id="fechaNacimiento"
+                  class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-700
+                    focus:outline-none focus:ring-2 focus:ring-purple-400
+                    focus:border-purple-400 transition" required>
+              </div>
+                 </div>
+
+            <button type="submit" id="btnSubmitMiembro"
+                    class="w-full bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white
+                           font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span id="textoBotonMiembro">Registrar miembro</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- LISTA DE MIEMBROS -->
         <div>
-          <h3 class="text-sm font-semibold text-purple-700 mb-2">Seleccionar participantes</h3>
-          <div id="miembros" class="border border-purple-100 rounded-lg p-3 space-y-1 max-h-48 overflow-y-auto bg-purple-50">
-            <p class="text-sm text-gray-400">Registra miembros primero para poder seleccionarlos.</p>
+          <p class="text-sm text-gray-500 font-medium mb-3">
+            <span id="contadorMiembros" class="text-purple-700 font-bold">0</span> miembro(s) registrado(s)
+          </p>
+
+          <div id="vacioMiembros"
+               class="bg-white border border-dashed border-purple-200 rounded-2xl p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-purple-200 mb-2"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857
+                       M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857
+                       m0 0a5.002 5.002 0 019.288 0"/>
+            </svg>
+            <p class="text-gray-400 text-sm">Aún no hay miembros registrados.</p>
+          </div>
+
+          <div id="listaMiembros" class="space-y-3"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== SECCIÓN PROYECTOS ===== -->
+    <section>
+      <div class="flex items-center gap-2 mb-5">
+        <span class="w-1 h-6 bg-purple-400 rounded-full"></span>
+        <h2 class="text-lg font-bold text-purple-900 uppercase tracking-wide">Gestión de Proyectos</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+        <!-- FORMULARIO PROYECTO -->
+        <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
+          <div class="bg-purple-700 px-5 py-3 flex items-center justify-between">
+            <span id="tituloFormProyecto" class="text-white font-semibold text-sm">
+              ➕ Registrar nuevo proyecto
+            </span>
+          </div>
+
+          <div class="p-5 space-y-4">
+
+            <div class="flex flex-col gap-1">
+              <label for="nombreProyecto"
+                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                Nombre del proyecto <span class="text-red-400">*</span>
+              </label>
+              <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica"
+                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                            focus:border-purple-400 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="flex flex-col gap-1">
+                <label for="tipo"
+                       class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Tipo</label>
+                <input id="tipo" type="text" placeholder="Ej. Hackathon"
+                       class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                              placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                              focus:border-purple-400 transition">
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="fecha"
+                       class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Fecha</label>
+                <input id="fecha" type="date"
+                       class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-700
+                              focus:outline-none focus:ring-2 focus:ring-purple-400
+                              focus:border-purple-400 transition">
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label for="descripcion"
+                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Descripción</label>
+              <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…"
+                        class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
+                               placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
+                               focus:border-purple-400 transition resize-none"></textarea>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
+                Participantes
+              </label>
+              <div id="miembros"
+                   class="border border-purple-100 rounded-lg p-3 space-y-1 max-h-40
+                          overflow-y-auto bg-purple-50">
+                <p class="text-xs text-gray-400 italic">
+                  Registra miembros primero para poder seleccionarlos.
+                </p>
+              </div>
+            </div>
+
+            <button id="btnProyecto" onclick="crearProyecto()"
+                    class="w-full bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white
+                           font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+              Crear proyecto
+            </button>
+
           </div>
         </div>
 
-        <button 
-          id="btnProyecto"
-          class="w-full bg-purple-900 text-white py-2 rounded-lg hover:bg-purple-700 transition"
-          onclick="crearProyecto()"
-        >
-          Crear proyecto
+        <!-- LISTA DE PROYECTOS -->
+        <div>
+          <p class="text-sm text-gray-500 font-medium mb-3">
+            <span id="contadorProyectos" class="text-purple-700 font-bold">0</span> proyecto(s) registrado(s)
+          </p>
+
+          <div id="vacioProyectos"
+               class="bg-white border border-dashed border-purple-200 rounded-2xl p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-purple-200 mb-2"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
+                       M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <p class="text-gray-400 text-sm">Aún no hay proyectos registrados.</p>
+          </div>
+          <div id="lista" class="space-y-3"></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="text-center py-6 mt-4">
+    <p class="text-xs text-purple-300 tracking-widest uppercase">POLARIS © 2026</p>
+  </footer>
+
+  <!-- MODAL CONFIRMACIÓN ELIMINAR MIEMBRO -->
+  <div id="modalEliminar"
+       class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="bg-red-100 p-2 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858
+                     L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-bold text-gray-800">Confirmar eliminación</h3>
+      </div>
+      <p class="text-sm text-gray-600 mb-5">
+        ¿Estás seguro de que deseas eliminar a
+        <strong id="nombreAEliminar" class="text-gray-900"></strong>?
+        Esta acción no se puede deshacer.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="cerrarModal()"
+                class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50
+                       font-semibold py-2 rounded-lg text-sm transition">
+          Cancelar
+        </button>
+        <button id="btnConfirmarEliminar"
+                class="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800
+                       text-white font-semibold py-2 rounded-lg text-sm transition">
+          Sí, eliminar
         </button>
       </div>
     </div>
-
-    <!-- LISTA DE PROYECTOS -->
-    <div class="mb-10">
-      <h2 class="text-xl font-semibold mb-4 text-purple-700">Lista de proyectos</h2>
-      <div id="lista"></div>
-    </div>
-
-    <p class="text-sm text-purple-300 text-center mt-6">
-      POLARIS © 2026
-    </p>
-
   </div>
 
   <script src="app.js"></script>
