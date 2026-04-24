@@ -101,7 +101,14 @@ function actualizarValidacionParticipantes() {
   const participantesInput = document.getElementById('participantesValidacion');
   if (!participantesInput) return;
 
-  const hayParticipantes = document.querySelectorAll('#miembros input[type=checkbox]:checked').length > 0;
+  const seleccionados = document.querySelectorAll('#miembros input[type=checkbox]:checked').length;
+  const contadorSeleccionados = document.getElementById('contadorSeleccionados');
+  const hayParticipantes = seleccionados > 0;
+
+  if (contadorSeleccionados) {
+    contadorSeleccionados.textContent = seleccionados;
+  }
+
   participantesInput.value = hayParticipantes ? '1' : '';
   participantesInput.setCustomValidity(hayParticipantes ? '' : 'Selecciona al menos un participante.');
 }
@@ -398,10 +405,11 @@ async function cargarProyectos() {
 
     data.forEach((p, i) => {
       const card = document.createElement('div');
-      card.className = 'card-anim bg-white rounded-xl shadow-sm border border-purple-100 p-4';
+      card.className = 'card-anim bg-white rounded-xl shadow-sm border border-purple-100 p-5';
       card.style.animationDelay = `${i * 40}ms`;
 
       const fechaFormato = p.fecha ? formatearFechaDDMMYYYY(p.fecha) : '';
+      const periodoTexto = fechaFormato || 'Sin fecha';
 
       const participantesHTML = p.participantesInfo && p.participantesInfo.length > 0
         ? p.participantesInfo.map(m => {
@@ -411,8 +419,19 @@ async function cargarProyectos() {
         : '<span class="text-xs text-gray-400 italic">Sin participantes asignados</span>';
 
       card.innerHTML = `
-        <div class="flex items-start justify-between gap-2 mb-2">
-          <h3 class="font-bold text-gray-800 text-sm leading-tight">${p.nombre}</h3>
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="min-w-0">
+            <h3 class="font-bold text-gray-800 text-base leading-tight truncate">${p.nombre}</h3>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              ${p.tipo ? `<span class="text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-0.5 rounded-full font-semibold">${p.tipo}</span>` : ''}
+              <span class="text-xs text-gray-500 inline-flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                ${periodoTexto}
+              </span>
+            </div>
+          </div>
           <div class="flex flex-shrink-0 gap-1.5">
             <button onclick="editarProyecto(${p.id}, '${escapar(p.nombre)}', '${escapar(p.tipo)}',
                             '${p.fecha}', '${escapar(p.descripcion)}', ${JSON.stringify(p.participantes)})"
@@ -426,7 +445,7 @@ async function cargarProyectos() {
               </svg>
               Editar
             </button>
-                <button onclick="abrirModalProyecto(${p.id}, '${escapar(p.nombre)}')"
+            <button onclick="abrirModalProyecto(${p.id}, '${escapar(p.nombre)}')"
                     class="flex items-center gap-1 text-xs bg-red-50 text-red-600 border border-red-200
                            px-2.5 py-1.5 rounded-lg hover:bg-red-100 transition font-medium">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
@@ -440,16 +459,11 @@ async function cargarProyectos() {
           </div>
         </div>
 
-        <div class="flex items-center gap-2 mb-2">
-          ${p.tipo ? `<span class="text-xs bg-purple-50 text-purple-600 border border-purple-200 px-2 py-0.5 rounded-full font-medium">${p.tipo}</span>` : ''}
-          ${fechaFormato ? `<span class="text-xs text-gray-400">${fechaFormato}</span>` : ''}
-        </div>
-
         ${p.descripcion ? `<p class="text-xs text-gray-600 mb-3 leading-relaxed">${p.descripcion}</p>` : ''}
 
         <div>
-          <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1.5">Participantes</p>
-          <div class="flex flex-wrap gap-1.5">${participantesHTML}</div>
+          <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-2">Participantes</p>
+          <div class="flex flex-wrap gap-2">${participantesHTML}</div>
         </div>
       `;
       contenedor.appendChild(card);
