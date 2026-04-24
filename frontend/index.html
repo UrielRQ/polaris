@@ -185,20 +185,24 @@
 
         <!-- FORMULARIO PROYECTO -->
         <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
-          <div class="bg-purple-700 px-5 py-3 flex items-center justify-between">
+          <div id="modoBannerProyecto" class="bg-purple-700 px-5 py-3 flex items-center justify-between">
             <span id="tituloFormProyecto" class="text-white font-semibold text-sm">
               ➕ Registrar nuevo proyecto
             </span>
+            <button id="btnCancelarProyecto" type="button" onclick="cancelarEdicionProyecto()"
+                    class="hidden text-purple-200 hover:text-white text-xs underline transition">
+              Cancelar edición
+            </button>
           </div>
 
-          <div class="p-5 space-y-4">
+          <form id="formProyecto" class="p-5 space-y-4">
 
             <div class="flex flex-col gap-1">
               <label for="nombreProyecto"
                      class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
                 Nombre del proyecto <span class="text-red-400">*</span>
               </label>
-              <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica"
+              <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica" required
                      class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
                             placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
                             focus:border-purple-400 transition">
@@ -207,16 +211,16 @@
             <div class="grid grid-cols-2 gap-3">
               <div class="flex flex-col gap-1">
                 <label for="tipo"
-                       class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Tipo</label>
-                <input id="tipo" type="text" placeholder="Ej. Hackathon"
+                    class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Tipo <span class="text-red-400">*</span></label>
+                  <input id="tipo" type="text" placeholder="Ej. Hackathon" required
                        class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
                               placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
                               focus:border-purple-400 transition">
               </div>
               <div class="flex flex-col gap-1">
                 <label for="fecha"
-                       class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Fecha</label>
-                <input id="fecha" type="date"
+                    class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Fecha <span class="text-red-400">*</span></label>
+                  <input id="fecha" type="date" required
                        class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-700
                               focus:outline-none focus:ring-2 focus:ring-purple-400
                               focus:border-purple-400 transition">
@@ -225,8 +229,8 @@
 
             <div class="flex flex-col gap-1">
               <label for="descripcion"
-                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Descripción</label>
-              <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…"
+                  class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Descripción <span class="text-red-400">*</span></label>
+                <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…" required
                         class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
                                placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
                                focus:border-purple-400 transition resize-none"></textarea>
@@ -234,8 +238,10 @@
 
             <div class="flex flex-col gap-1">
               <label class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                Participantes
+                Participantes <span class="text-red-400">*</span>
               </label>
+              <input id="participantesValidacion" type="text" tabindex="-1" aria-hidden="true" required
+                     class="absolute opacity-0 pointer-events-none h-0 w-0 overflow-hidden">
               <div id="miembros"
                    class="border border-purple-100 rounded-lg p-3 space-y-1 max-h-40
                           overflow-y-auto bg-purple-50">
@@ -245,7 +251,7 @@
               </div>
             </div>
 
-            <button id="btnProyecto" onclick="crearProyecto()"
+            <button id="btnProyecto" type="submit"
                     class="w-full bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white
                            font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
@@ -255,7 +261,7 @@
               Crear proyecto
             </button>
 
-          </div>
+          </form>
         </div>
 
         <!-- LISTA DE PROYECTOS -->
@@ -313,6 +319,41 @@
           Cancelar
         </button>
         <button id="btnConfirmarEliminar"
+                class="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800
+                       text-white font-semibold py-2 rounded-lg text-sm transition">
+          Sí, eliminar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMACIÓN ELIMINAR PROYECTO -->
+  <div id="modalEliminarProyecto"
+       class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="bg-red-100 p-2 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858
+                     L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          </svg>
+        </div>
+        <h3 class="text-base font-bold text-gray-800">Confirmar eliminación</h3>
+      </div>
+      <p class="text-sm text-gray-600 mb-5">
+        ¿Estás seguro de que deseas eliminar el proyecto
+        <strong id="nombreAEliminarProyecto" class="text-gray-900"></strong>?
+        Esta acción no se puede deshacer.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="cerrarModalProyecto()"
+                class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50
+                       font-semibold py-2 rounded-lg text-sm transition">
+          Cancelar
+        </button>
+        <button id="btnConfirmarEliminarProyecto"
                 class="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800
                        text-white font-semibold py-2 rounded-lg text-sm transition">
           Sí, eliminar

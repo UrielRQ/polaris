@@ -1,8 +1,10 @@
 // ─── Estado global ────────────────────────────────────────────────────────────
 const form = document.getElementById('formMiembro');
+const formProyecto = document.getElementById('formProyecto');
 let editandoId = null;
 let editandoProyectoId = null;
 let idAEliminar = null;      // para el modal de confirmación
+let idAEliminarProyecto = null;
 
 // ─── COLORES de rol (badge visual) ───────────────────────────────────────────
 const COLORES_ROL = [
@@ -60,6 +62,76 @@ function cancelarEdicion() {
   setModoRegistro();
 }
 
+function setModoRegistroProyecto() {
+  document.getElementById('tituloFormProyecto').textContent = '➕ Registrar nuevo proyecto';
+  document.getElementById('btnProyecto').innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+    </svg>
+    Crear proyecto`;
+  document.getElementById('btnCancelarProyecto').classList.add('hidden');
+  document.getElementById('modoBannerProyecto').className =
+    'bg-purple-700 px-5 py-3 flex items-center justify-between';
+}
+
+function setModoEdicionProyecto(nombre) {
+  document.getElementById('tituloFormProyecto').textContent = `✏️ Editando: ${nombre}`;
+  document.getElementById('btnProyecto').innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+            d="M5 13l4 4L19 7"/>
+    </svg>
+    Guardar cambios`;
+  document.getElementById('btnCancelarProyecto').classList.remove('hidden');
+  document.getElementById('modoBannerProyecto').className =
+    'bg-amber-500 px-5 py-3 flex items-center justify-between';
+}
+
+function cancelarEdicionProyecto() {
+  editandoProyectoId = null;
+  formProyecto.reset();
+  document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => cb.checked = false);
+  actualizarValidacionParticipantes();
+  setModoRegistroProyecto();
+}
+
+function actualizarValidacionParticipantes() {
+  const participantesInput = document.getElementById('participantesValidacion');
+  if (!participantesInput) return;
+
+  const hayParticipantes = document.querySelectorAll('#miembros input[type=checkbox]:checked').length > 0;
+  participantesInput.value = hayParticipantes ? '1' : '';
+  participantesInput.setCustomValidity(hayParticipantes ? '' : 'Selecciona al menos un participante.');
+}
+
+function abrirModalProyecto(id, nombre) {
+  idAEliminarProyecto = id;
+  document.getElementById('nombreAEliminarProyecto').textContent = nombre;
+  const modal = document.getElementById('modalEliminarProyecto');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function cerrarModalProyecto() {
+  idAEliminarProyecto = null;
+  const modal = document.getElementById('modalEliminarProyecto');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+document.getElementById('btnConfirmarEliminarProyecto').addEventListener('click', async () => {
+  if (!idAEliminarProyecto) return;
+  await fetch(`http://localhost:3000/proyectos/${idAEliminarProyecto}`, { method: 'DELETE' });
+  cerrarModalProyecto();
+  cargarProyectos();
+});
+
+document.getElementById('modalEliminarProyecto').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) cerrarModalProyecto();
+});
+
 // ─── MODAL DE CONFIRMACIÓN ───────────────────────────────────────────────────
 function abrirModal(id, nombre) {
   idAEliminar = id;
@@ -87,6 +159,8 @@ document.getElementById('btnConfirmarEliminar').addEventListener('click', async 
 document.getElementById('modalEliminar').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) cerrarModal();
 });
+
+document.getElementById('miembros')?.addEventListener('change', actualizarValidacionParticipantes);
 
 // ─── SUBMIT (CREATE o UPDATE) ─────────────────────────────────────────────────
 form.addEventListener('submit', async (e) => {
@@ -254,13 +328,7 @@ async function crearProyecto() {
       body: JSON.stringify(data),
     });
     editandoProyectoId = null;
-    document.getElementById('btnProyecto').innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-           viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-      </svg>
-      Crear proyecto`;
-    document.getElementById('tituloFormProyecto').textContent = '➕ Registrar nuevo proyecto';
+    setModoRegistroProyecto();
   } else {
     await fetch('http://localhost:3000/proyectos', {
       method: 'POST',
@@ -270,13 +338,25 @@ async function crearProyecto() {
   }
 
   // Limpiar formulario proyecto
-  ['nombreProyecto', 'tipo', 'fecha', 'descripcion'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+  formProyecto.reset();
   document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => cb.checked = false);
+  actualizarValidacionParticipantes();
 
   cargarProyectos();
 }
+
+formProyecto.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  actualizarValidacionParticipantes();
+
+  if (!formProyecto.checkValidity()) {
+    formProyecto.reportValidity();
+    return;
+  }
+
+  await crearProyecto();
+});
 
 // ─── EDITAR PROYECTO ──────────────────────────────────────────────────────────
 function editarProyecto(id, nombre, tipo, fecha, descripcion, participantes) {
@@ -285,28 +365,20 @@ function editarProyecto(id, nombre, tipo, fecha, descripcion, participantes) {
   document.getElementById('fecha').value          = fecha;
   document.getElementById('descripcion').value    = descripcion;
   editandoProyectoId = id;
-
-  document.getElementById('btnProyecto').innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round"
-            d="M5 13l4 4L19 7"/>
-    </svg>
-    Guardar cambios`;
-  document.getElementById('tituloFormProyecto').textContent = `✏️ Editando: ${nombre}`;
+  setModoEdicionProyecto(nombre);
 
   document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => {
     cb.checked = participantes.includes(parseInt(cb.value));
   });
 
+  actualizarValidacionParticipantes();
+
   document.getElementById('nombreProyecto').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // ─── ELIMINAR PROYECTO ────────────────────────────────────────────────────────
-async function eliminarProyecto(id) {
-  if (!confirm('¿Eliminar este proyecto? Esta acción no se puede deshacer.')) return;
-  await fetch(`http://localhost:3000/proyectos/${id}`, { method: 'DELETE' });
-  cargarProyectos();
+function eliminarProyecto(id, nombre) {
+  abrirModalProyecto(id, nombre);
 }
 
 // ─── CARGAR PROYECTOS ─────────────────────────────────────────────────────────
@@ -354,7 +426,7 @@ async function cargarProyectos() {
               </svg>
               Editar
             </button>
-            <button onclick="eliminarProyecto(${p.id})"
+                <button onclick="abrirModalProyecto(${p.id}, '${escapar(p.nombre)}')"
                     class="flex items-center gap-1 text-xs bg-red-50 text-red-600 border border-red-200
                            px-2.5 py-1.5 rounded-lg hover:bg-red-100 transition font-medium">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
