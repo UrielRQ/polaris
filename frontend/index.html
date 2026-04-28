@@ -3,365 +3,732 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>POLARIS</title>
+  <title>POLARIS — Sistema de Gestión de Equipos</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            primary: {
-              50:  '#f5f3ff',
-              100: '#ede9fe',
-              200: '#ddd6fe',
-              300: '#c4b5fd',
-              400: '#a78bfa',
-              500: '#8b5cf6',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              800: '#5b21b6',
-              900: '#4c1d95',
+            polar: {
+              50:  '#f0f4ff',
+              100: '#dde6ff',
+              200: '#c2d1ff',
+              300: '#9db3ff',
+              400: '#7088f8',
+              500: '#4f62f0',
+              600: '#3a44e4',
+              700: '#3035c9',
+              800: '#2a2ea3',
+              900: '#1e2160',
+              950: '#0f1030',
             }
+          },
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body: ['Space Grotesk', 'sans-serif'],
           }
         }
       }
     }
   </script>
   <style>
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(10px); }
+    * { font-family: 'Space Grotesk', sans-serif; }
+    h1, h2, .font-display { font-family: 'Syne', sans-serif; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .card-anim { animation: fadeInUp 0.22s ease both; }
-    #modoBanner { transition: background-color 0.3s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      33%       { transform: translateY(-8px) rotate(1deg); }
+      66%       { transform: translateY(-4px) rotate(-1deg); }
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50%       { opacity: 0.7; transform: scale(1.05); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .anim-fadeup   { animation: fadeUp 0.6s cubic-bezier(.22,1,.36,1) both; }
+    .anim-fadein   { animation: fadeIn 0.5s ease both; }
+    .anim-float    { animation: float 6s ease-in-out infinite; }
+    .card-anim     { animation: cardIn 0.35s cubic-bezier(.22,1,.36,1) both; }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+
+    /* ── Glassmorphism ── */
+    .glass {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .glass-light {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* ── Gradient mesh bg ── */
+    .hero-bg {
+      background: #0f1030;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79,98,240,0.35) 0%, transparent 70%);
+      top: -150px; left: -100px;
+      animation: pulse-slow 8s ease-in-out infinite;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(112,136,248,0.25) 0%, transparent 70%);
+      bottom: -100px; right: -50px;
+      animation: pulse-slow 10s ease-in-out infinite 2s;
+    }
+
+    /* ── Module cards hover ── */
+    .module-card {
+      transition: transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+    .module-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(79,98,240,0.3);
+    }
+    .module-card:active { transform: translateY(-2px); }
+
+    /* ── Nav link ── */
+    .nav-link {
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-link:hover { background: rgba(112,136,248,0.18); }
+    .nav-link.active { background: rgba(79,98,240,0.28); color: white; }
+
+    /* ── View transition ── */
+    .view { display: none; }
+    .view.active { display: block; animation: fadeIn 0.3s ease; }
+
+    /* ── Section accent line ── */
+    .section-line::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 20px;
+      background: #4f62f0;
+      border-radius: 2px;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    /* ── Mode banner transition ── */
+    #modoBanner, #modoBannerProyecto { transition: background-color 0.3s ease; }
+
+    /* ── Stat card shimmer ── */
+    .stat-card {
+      background: linear-gradient(135deg, #1e2160 0%, #2a2ea3 100%);
+      border: 1px solid rgba(79,98,240,0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(79,98,240,0.25);
+    }
+
+    /* ── Star decoration ── */
+    .star-icon { filter: drop-shadow(0 0 8px rgba(112,136,248,0.8)); }
+
+    /* ── Subtle grid pattern ── */
+    .grid-pattern {
+      background-image: linear-gradient(rgba(79,98,240,0.07) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(79,98,240,0.07) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1030; }
+    ::-webkit-scrollbar-thumb { background: #3a44e4; border-radius: 3px; }
+
+    /* ── Form inputs ── */
+    .polaris-input {
+      background: #f8f9ff;
+      border: 1.5px solid #e2e6ff;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #1e2160;
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    .polaris-input:focus {
+      border-color: #4f62f0;
+      box-shadow: 0 0 0 3px rgba(79,98,240,0.12);
+    }
+    .polaris-input::placeholder { color: #9da3cc; }
+
+    textarea.polaris-input { resize: none; }
+
+    /* ── Responsive orb ── */
+    @media (max-width: 768px) {
+      .hero-bg::before { width: 300px; height: 300px; }
+      .hero-bg::after  { width: 250px; height: 250px; }
+    }
   </style>
 </head>
 
-<body class="bg-purple-50 min-h-screen">
+<body class="bg-polar-950 min-h-screen text-white">
 
-  <!-- HEADER -->
-  <header class="bg-purple-900 text-white shadow-lg">
-    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-300 flex-shrink-0"
-           fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M12 2l2.09 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l5.91-.91z"/>
-      </svg>
-      <div>
-        <h1 class="text-2xl font-bold tracking-wide leading-none">POLARIS</h1>
-        <p class="text-purple-300 text-xs mt-0.5 tracking-widest uppercase">Sistema de gestión de equipos</p>
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-[#0b1a3a]/95 backdrop-blur-md border-b border-blue-200/10 shadow-[0_8px_24px_rgba(6,17,47,0.45)]">
+    <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+      <button onclick="navigateTo('home')" class="flex items-center gap-2.5 group">
+        <div class="w-8 h-8 rounded-lg bg-polar-500 flex items-center justify-center group-hover:bg-polar-400 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 star-icon" fill="currentColor" viewBox="0 0 24 24" width="18" height="18">
+            <path d="M12 2l2.09 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l5.91-.91z"/>
+          </svg>
+        </div>
+        <span class="font-display text-lg font-bold tracking-wider text-white">POLARIS</span>
+      </button>
+
+      <div class="flex items-center gap-1">
+        <button id="nav-home" onclick="navigateTo('home')"
+          class="nav-link active px-4 py-1.5 rounded-lg text-sm font-medium text-white/80 transition">
+          Inicio
+        </button>
+        <button id="nav-miembros" onclick="navigateTo('miembros')"
+          class="nav-link px-4 py-1.5 rounded-lg text-sm font-medium text-white/80 transition">
+          Miembros
+        </button>
+        <button id="nav-proyectos" onclick="navigateTo('proyectos')"
+          class="nav-link px-4 py-1.5 rounded-lg text-sm font-medium text-white/80 transition">
+          Proyectos
+        </button>
+        <button id="nav-equipo" onclick="navigateTo('equipo')"
+          class="nav-link px-4 py-1.5 rounded-lg text-sm font-medium text-white/80 transition">
+          Equipo
+        </button>
       </div>
     </div>
-  </header>
+  </nav>
 
-  <main class="max-w-5xl mx-auto px-6 py-8 space-y-10">
+  <div id="view-home" class="view active">
 
-    <!-- ===== SECCIÓN MIEMBROS ===== -->
-    <section>
-      <div class="flex items-center gap-2 mb-5">
-        <span class="w-1 h-6 bg-purple-600 rounded-full"></span>
-        <h2 class="text-lg font-bold text-purple-900 uppercase tracking-wide">Gestión de Miembros</h2>
+    <section class="hero-bg min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16 grid-pattern relative">
+      <div class="absolute top-32 left-16 opacity-30 anim-float" style="animation-delay:0s">
+        <svg width="6" height="6"><circle cx="3" cy="3" r="3" fill="#7088f8"/></svg>
+      </div>
+      <div class="absolute top-48 right-24 opacity-50 anim-float" style="animation-delay:1.5s">
+        <svg width="4" height="4"><circle cx="2" cy="2" r="2" fill="#7088f8"/></svg>
+      </div>
+      <div class="absolute bottom-40 left-32 opacity-40 anim-float" style="animation-delay:3s">
+        <svg width="8" height="8"><circle cx="4" cy="4" r="4" fill="#7088f8"/></svg>
+      </div>
+      <div class="absolute top-60 left-1/3 opacity-20 anim-float" style="animation-delay:0.8s">
+        <svg width="5" height="5"><circle cx="2.5" cy="2.5" r="2.5" fill="#a0aaff"/></svg>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-
-        <!-- FORMULARIO MIEMBRO -->
-        <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
-
-          <!-- Banner modo (registro / edición) -->
-          <div id="modoBanner" class="bg-purple-700 px-5 py-3 flex items-center justify-between">
-            <span id="tituloFormulario" class="text-white font-semibold text-sm">
-              ➕ Registrar nuevo miembro
-            </span>
-            <button id="btnCancelar" onclick="cancelarEdicion()"
-                    class="hidden text-purple-200 hover:text-white text-xs underline transition">
-              Cancelar edición
-            </button>
-          </div>
-
-          <form id="formMiembro" class="p-5 space-y-4">
-
-            <div class="flex flex-col gap-1">
-              <label for="nombreMiembro"
-                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                Nombre completo <span class="text-red-400">*</span>
-              </label>
-              <input type="text" id="nombreMiembro" placeholder="Ej. Ana García" autocomplete="off"
-                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                            focus:border-purple-400 transition" required>
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label for="correo"
-                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                Correo electrónico <span class="text-red-400">*</span>
-              </label>
-              <input type="email" id="correo" placeholder="Ej. ana@polaris.dev" autocomplete="off"
-                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                            focus:border-purple-400 transition" required>
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label for="rol"
-                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                Rol en el equipo <span class="text-red-400">*</span>
-              </label>
-              <input type="text" id="rol" placeholder="Ej. Frontend Developer" autocomplete="off"
-                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                            focus:border-purple-400 transition" required>
-            </div>
-
-                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div class="flex flex-col gap-1">
-                <label for="telefono"
-                  class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                  Numero telefonico <span class="text-red-400">*</span>
-                </label>
-                <input type="tel" id="telefono" placeholder="Ej. 5512345678" autocomplete="off"
-                  class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                    placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                    focus:border-purple-400 transition" required>
-              </div>
-
-              <div class="flex flex-col gap-1">
-                <label for="fechaNacimiento"
-                  class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                  Fecha de nacimiento <span class="text-red-400">*</span>
-                </label>
-                <input type="date" id="fechaNacimiento"
-                  class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-700
-                    focus:outline-none focus:ring-2 focus:ring-purple-400
-                    focus:border-purple-400 transition" required>
-              </div>
-                 </div>
-
-            <button type="submit" id="btnSubmitMiembro"
-                    class="w-full bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white
-                           font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-              </svg>
-              <span id="textoBotonMiembro">Registrar miembro</span>
-            </button>
-          </form>
+      <div class="relative z-10 text-center max-w-4xl mx-auto">
+        <div class="anim-fadeup inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs font-medium text-polar-300 mb-8 border border-polar-500/30">
+          <span class="w-2 h-2 rounded-full bg-polar-400 animate-pulse"></span>
+          Instituto Tecnológico de Matamoros · 2026
         </div>
 
-        <!-- LISTA DE MIEMBROS -->
-        <div>
-          <p class="text-sm text-gray-500 font-medium mb-3">
-            <span id="contadorMiembros" class="text-purple-700 font-bold">0</span> miembro(s) registrado(s)
-          </p>
+        <h1 class="anim-fadeup delay-1 font-display text-7xl md:text-8xl font-extrabold tracking-tight mb-6 leading-none">
+          <span class="text-white">POL</span><span style="background: linear-gradient(135deg,#7088f8,#4f62f0); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">ARIS</span>
+        </h1>
 
-          <div id="vacioMiembros"
-               class="bg-white border border-dashed border-purple-200 rounded-2xl p-8 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-purple-200 mb-2"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857
-                       M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857
-                       m0 0a5.002 5.002 0 019.288 0"/>
+        <p class="anim-fadeup delay-2 text-xl md:text-2xl text-white/60 font-light max-w-2xl mx-auto mb-4 leading-relaxed">
+          Formando a la próxima generación de líderes en <br>
+          <span class="text-white/85 font-medium">tecnologías espaciales</span>
+        </p>
+
+        <p class="anim-fadeup delay-3 text-sm text-polar-400 tracking-widest uppercase font-semibold mb-12">
+          ✦ Equipo DoubleSpace ✦
+        </p>
+
+        <div class="anim-fadeup delay-4 flex flex-wrap gap-4 justify-center mb-20">
+          <button onclick="navigateTo('miembros')"
+            class="px-7 py-3 bg-polar-500 hover:bg-polar-400 text-white font-semibold rounded-xl transition text-sm flex items-center gap-2 shadow-lg shadow-polar-600/30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
             </svg>
-            <p class="text-gray-400 text-sm">Aún no hay miembros registrados.</p>
-          </div>
-
-          <div id="listaMiembros" class="space-y-3"></div>
+            Gestionar Miembros
+          </button>
+          <button onclick="navigateTo('proyectos')"
+            class="px-7 py-3 glass hover:bg-white/15 text-white font-semibold rounded-xl transition text-sm flex items-center gap-2 border border-white/20">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            Ver Proyectos
+          </button>
         </div>
 
+        <div class="anim-fadeup delay-5 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+          <div class="stat-card rounded-2xl p-5 text-center">
+            <div class="text-3xl font-display font-bold text-white" id="home-stat-miembros">—</div>
+            <div class="text-xs text-polar-300 mt-1 font-medium uppercase tracking-wide">Miembros</div>
+          </div>
+          <div class="stat-card rounded-2xl p-5 text-center">
+            <div class="text-3xl font-display font-bold text-white" id="home-stat-proyectos">—</div>
+            <div class="text-xs text-polar-300 mt-1 font-medium uppercase tracking-wide">Proyectos</div>
+          </div>
+          <div class="stat-card rounded-2xl p-5 text-center">
+            <div class="text-3xl font-display font-bold text-white">2026</div>
+            <div class="text-xs text-polar-300 mt-1 font-medium uppercase tracking-wide">Generación</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-40">
+        <svg class="animate-bounce w-5 h-5 text-polar-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
       </div>
     </section>
 
-    <!-- ===== SECCIÓN PROYECTOS ===== -->
-    <section>
-      <div class="flex items-center gap-2 mb-5">
-        <span class="w-1 h-6 bg-purple-400 rounded-full"></span>
-        <h2 class="text-lg font-bold text-purple-900 uppercase tracking-wide">Gestión de Proyectos</h2>
-      </div>
+    <section class="bg-polar-950 grid-pattern py-20 px-6">
+      <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-14">
+          <h2 class="font-display text-3xl font-bold text-white mb-3">Módulos del Sistema</h2>
+          <p class="text-white/45 text-base">Accede directamente a cualquier sección del portal</p>
+        </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-
-        <!-- FORMULARIO PROYECTO -->
-        <div class="bg-white rounded-2xl shadow-sm border border-purple-100 overflow-hidden">
-          <div id="modoBannerProyecto" class="bg-purple-700 px-5 py-3 flex items-center justify-between">
-            <span id="tituloFormProyecto" class="text-white font-semibold text-sm">
-              ➕ Registrar nuevo proyecto
-            </span>
-            <button id="btnCancelarProyecto" type="button" onclick="cancelarEdicionProyecto()"
-                    class="hidden text-purple-200 hover:text-white text-xs underline transition">
-              Cancelar edición
-            </button>
-          </div>
-
-          <form id="formProyecto" class="p-5 space-y-4">
-
-            <div class="flex flex-col gap-1">
-              <label for="nombreProyecto"
-                     class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                Nombre del proyecto <span class="text-red-400">*</span>
-              </label>
-              <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica" required
-                     class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                            placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                            focus:border-purple-400 transition">
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div class="flex flex-col gap-1">
-                <label for="tipo"
-                    class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Tipo <span class="text-red-400">*</span></label>
-                  <input id="tipo" type="text" placeholder="Ej. Hackathon" required
-                       class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                              placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                              focus:border-purple-400 transition">
-              </div>
-              <div class="flex flex-col gap-1">
-                <label for="fecha"
-                    class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Fecha <span class="text-red-400">*</span></label>
-                  <input id="fecha" type="date" required
-                       class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-700
-                              focus:outline-none focus:ring-2 focus:ring-purple-400
-                              focus:border-purple-400 transition">
-              </div>
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label for="descripcion"
-                  class="text-xs font-semibold text-purple-700 uppercase tracking-wide">Descripción <span class="text-red-400">*</span></label>
-                <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…" required
-                        class="w-full border border-purple-200 rounded-lg px-3 py-2.5 text-sm text-gray-800
-                               placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400
-                               focus:border-purple-400 transition resize-none"></textarea>
-            </div>
-
-            <div class="flex flex-col gap-1">
-              <label class="text-xs font-semibold text-purple-700 uppercase tracking-wide">
-                Participantes <span class="text-red-400">*</span>
-              </label>
-              <div class="flex items-center justify-between text-[11px] text-gray-500">
-                <span>Selecciona uno o más miembros para asignarlos al proyecto.</span>
-                <span class="font-semibold text-purple-700"><span id="contadorSeleccionados">0</span> seleccionados</span>
-              </div>
-              <input id="participantesValidacion" type="text" tabindex="-1" aria-hidden="true" required
-                     class="absolute opacity-0 pointer-events-none h-0 w-0 overflow-hidden">
-              <div id="miembros"
-                   class="border border-purple-100 rounded-lg p-3 space-y-1 max-h-44
-                          overflow-y-auto bg-purple-50 shadow-inner">
-                <p class="text-xs text-gray-400 italic">
-                  Registra miembros primero para poder seleccionarlos.
-                </p>
-              </div>
-            </div>
-
-            <button id="btnProyecto" type="submit"
-                    class="w-full bg-purple-700 hover:bg-purple-600 active:bg-purple-800 text-white
-                           font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                   viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div onclick="navigateTo('miembros')"
+            class="module-card glass rounded-2xl p-6 flex flex-col items-start gap-4 border border-white/10 hover:border-polar-500/50">
+            <div class="w-12 h-12 rounded-xl bg-polar-600/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-polar-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
               </svg>
-              Crear proyecto
-            </button>
-
-          </form>
-        </div>
-
-        <!-- LISTA DE PROYECTOS -->
-        <div>
-          <p class="text-sm text-gray-500 font-medium mb-3">
-            <span id="contadorProyectos" class="text-purple-700 font-bold">0</span> proyecto(s) registrado(s)
-          </p>
-
-          <div id="vacioProyectos"
-               class="bg-white border border-dashed border-purple-200 rounded-2xl p-8 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-purple-200 mb-2"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
-                       M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            <p class="text-gray-400 text-sm">Aún no hay proyectos registrados.</p>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white text-base mb-1">Miembros</h3>
+              <p class="text-white/45 text-xs leading-relaxed">Registra, edita y administra los integrantes del equipo</p>
+            </div>
+            <div class="mt-auto flex items-center gap-1.5 text-xs text-polar-400 font-medium">
+              Ir al módulo
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
           </div>
-          <div id="lista" class="space-y-3"></div>
-        </div>
 
+          <div onclick="navigateTo('proyectos')"
+            class="module-card glass rounded-2xl p-6 flex flex-col items-start gap-4 border border-white/10 hover:border-polar-500/50">
+            <div class="w-12 h-12 rounded-xl bg-polar-600/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-polar-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white text-base mb-1">Proyectos</h3>
+              <p class="text-white/45 text-xs leading-relaxed">Gestiona eventos, proyectos y asigna participantes</p>
+            </div>
+            <div class="mt-auto flex items-center gap-1.5 text-xs text-polar-400 font-medium">
+              Ir al módulo
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+
+          <div onclick="navigateTo('equipo')"
+            class="module-card glass rounded-2xl p-6 flex flex-col items-start gap-4 border border-white/10 hover:border-polar-500/50">
+            <div class="w-12 h-12 rounded-xl bg-polar-600/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-polar-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white text-base mb-1">Equipo</h3>
+              <p class="text-white/45 text-xs leading-relaxed">Conoce a los integrantes y su información de contacto</p>
+            </div>
+            <div class="mt-auto flex items-center gap-1.5 text-xs text-polar-400 font-medium">
+              Ver equipo
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+
+          <div onclick="navigateTo('dashboard')"
+            class="module-card glass rounded-2xl p-6 flex flex-col items-start gap-4 border border-white/10 hover:border-polar-500/50">
+            <div class="w-12 h-12 rounded-xl bg-polar-600/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-polar-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-white text-base mb-1">Dashboard</h3>
+              <p class="text-white/45 text-xs leading-relaxed">Resumen general de actividad del sistema</p>
+            </div>
+            <div class="mt-auto flex items-center gap-1.5 text-xs text-polar-400 font-medium">
+              Ver resumen
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-  </main>
+    <footer class="bg-polar-950 border-t border-white/5 py-8 px-6 text-center">
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-polar-500 star-icon" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l2.09 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l5.91-.91z"/>
+        </svg>
+        <span class="font-display text-sm font-bold tracking-widest text-white/40 uppercase">POLARIS</span>
+      </div>
+      <p class="text-xs text-white/25 tracking-widest uppercase">Sistema de Gestión de Equipos · 2026</p>
+    </footer>
+  </div>
 
-  <footer class="text-center py-6 mt-4">
-    <p class="text-xs text-purple-300 tracking-widest uppercase">POLARIS © 2026</p>
-  </footer>
+  <div id="view-miembros" class="view">
+    <div class="min-h-screen bg-gray-50 pt-10">
+      <div class="bg-polar-950 px-6 py-10">
+        <div class="max-w-5xl mx-auto">
+          <div class="flex items-center gap-3 mb-1">
+            <button onclick="navigateTo('home')" class="text-polar-400 hover:text-white transition text-xs flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Inicio
+            </button>
+            <span class="text-white/20 text-xs">/</span>
+            <span class="text-white/60 text-xs">Miembros</span>
+          </div>
+          <h1 class="font-display text-3xl font-bold text-white">Gestión de Miembros</h1>
+          <p class="text-white/45 text-sm mt-1">Registra y administra los integrantes del equipo</p>
+        </div>
+      </div>
 
-  <!-- MODAL CONFIRMACIÓN ELIMINAR MIEMBRO -->
-  <div id="modalEliminar"
-       class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      <main class="max-w-5xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="modoBanner" class="bg-polar-600 px-5 py-3 flex items-center justify-between">
+              <span id="tituloFormulario" class="text-white font-semibold text-sm">➕ Registrar nuevo miembro</span>
+              <button id="btnCancelar" onclick="cancelarEdicion()"
+                class="hidden text-white/70 hover:text-white text-xs underline transition">Cancelar edición</button>
+            </div>
+            <form id="formMiembro" class="p-5 space-y-4">
+              <div class="flex flex-col gap-1">
+                <label for="nombreMiembro" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                  Nombre completo <span class="text-red-400">*</span>
+                </label>
+                <input type="text" id="nombreMiembro" placeholder="Ej. Ana García" autocomplete="off" class="polaris-input" required>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="correo" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                  Correo electrónico <span class="text-red-400">*</span>
+                </label>
+                <input type="email" id="correo" placeholder="Ej. ana@polaris.dev" autocomplete="off" class="polaris-input" required>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="rol" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                  Rol en el equipo <span class="text-red-400">*</span>
+                </label>
+                <input type="text" id="rol" placeholder="Ej. Frontend Developer" autocomplete="off" class="polaris-input" required>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1">
+                  <label for="telefono" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                    Teléfono <span class="text-red-400">*</span>
+                  </label>
+                  <input type="tel" id="telefono" placeholder="Ej. 5512345678" autocomplete="off" class="polaris-input" required>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label for="fechaNacimiento" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                    Nacimiento <span class="text-red-400">*</span>
+                  </label>
+                  <input type="date" id="fechaNacimiento" class="polaris-input" required>
+                </div>
+              </div>
+              <button type="submit" id="btnSubmitMiembro"
+                class="w-full bg-polar-600 hover:bg-polar-500 active:bg-polar-700 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span id="textoBotonMiembro">Registrar miembro</span>
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500 font-medium mb-3">
+              <span id="contadorMiembros" class="text-polar-600 font-bold">0</span> miembro(s) registrado(s)
+            </p>
+            <div id="vacioMiembros" class="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-200 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
+              </svg>
+              <p class="text-gray-400 text-sm">Aún no hay miembros registrados.</p>
+            </div>
+            <div id="listaMiembros" class="space-y-3"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="view-proyectos" class="view">
+    <div class="min-h-screen bg-gray-50 pt-10">
+      <div class="bg-polar-950 px-6 py-10">
+        <div class="max-w-5xl mx-auto">
+          <div class="flex items-center gap-3 mb-1">
+            <button onclick="navigateTo('home')" class="text-polar-400 hover:text-white transition text-xs flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Inicio
+            </button>
+            <span class="text-white/20 text-xs">/</span>
+            <span class="text-white/60 text-xs">Proyectos</span>
+          </div>
+          <h1 class="font-display text-3xl font-bold text-white">Gestión de Proyectos</h1>
+          <p class="text-white/45 text-sm mt-1">Crea y administra proyectos y eventos del equipo</p>
+        </div>
+      </div>
+
+      <main class="max-w-5xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="modoBannerProyecto" class="bg-polar-600 px-5 py-3 flex items-center justify-between">
+              <span id="tituloFormProyecto" class="text-white font-semibold text-sm">➕ Registrar nuevo proyecto</span>
+              <button id="btnCancelarProyecto" type="button" onclick="cancelarEdicionProyecto()"
+                class="hidden text-white/70 hover:text-white text-xs underline transition">Cancelar edición</button>
+            </div>
+            <form id="formProyecto" class="p-5 space-y-4">
+              <div class="flex flex-col gap-1">
+                <label for="nombreProyecto" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                  Nombre del proyecto <span class="text-red-400">*</span>
+                </label>
+                <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica" required class="polaris-input">
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1">
+                  <label for="tipo" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">Tipo <span class="text-red-400">*</span></label>
+                  <input id="tipo" type="text" placeholder="Ej. Hackathon" required class="polaris-input">
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label for="fecha" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">Fecha <span class="text-red-400">*</span></label>
+                  <input id="fecha" type="date" required class="polaris-input">
+                </div>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="descripcion" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">Descripción <span class="text-red-400">*</span></label>
+                <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…" required class="polaris-input"></textarea>
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
+                  Participantes <span class="text-red-400">*</span>
+                </label>
+                <div class="flex items-center justify-between text-[11px] text-gray-500 mb-1">
+                  <span>Selecciona uno o más miembros.</span>
+                  <span class="font-semibold text-polar-600"><span id="contadorSeleccionados">0</span> seleccionados</span>
+                </div>
+                <input id="participantesValidacion" type="text" tabindex="-1" aria-hidden="true" required
+                  class="absolute opacity-0 pointer-events-none h-0 w-0 overflow-hidden">
+                <div id="miembros" class="border border-gray-100 rounded-xl p-3 space-y-1 max-h-44 overflow-y-auto bg-gray-50">
+                  <p class="text-xs text-gray-400 italic">Registra miembros primero para poder seleccionarlos.</p>
+                </div>
+              </div>
+              <button id="btnProyecto" type="submit"
+                class="w-full bg-polar-600 hover:bg-polar-500 active:bg-polar-700 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                Crear proyecto
+              </button>
+            </form>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500 font-medium mb-3">
+              <span id="contadorProyectos" class="text-polar-600 font-bold">0</span> proyecto(s) registrado(s)
+            </p>
+            <div id="vacioProyectos" class="bg-white border border-dashed border-gray-200 rounded-2xl p-8 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-200 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              <p class="text-gray-400 text-sm">Aún no hay proyectos registrados.</p>
+            </div>
+            <div id="lista" class="space-y-3"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="view-equipo" class="view">
+    <div class="min-h-screen bg-gray-50 pt-10">
+      <div class="bg-polar-950 px-6 py-10">
+        <div class="max-w-5xl mx-auto">
+          <div class="flex items-center gap-3 mb-1">
+            <button onclick="navigateTo('home')" class="text-polar-400 hover:text-white transition text-xs flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Inicio
+            </button>
+            <span class="text-white/20 text-xs">/</span>
+            <span class="text-white/60 text-xs">Equipo</span>
+          </div>
+          <h1 class="font-display text-3xl font-bold text-white">Nuestro Equipo</h1>
+          <p class="text-white/45 text-sm mt-1">Conoce a los integrantes de Equipo DoubleSpace</p>
+        </div>
+      </div>
+      <main class="max-w-5xl mx-auto px-6 py-8">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-14 h-14 rounded-2xl bg-polar-600 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white star-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l2.09 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l5.91-.91z"/>
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-display text-xl font-bold text-polar-900">Equipo DoubleSpace</h2>
+              <p class="text-gray-500 text-sm">Sistema POLARIS · Generación 2026</p>
+            </div>
+          </div>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            POLARIS es nuestra propuesta para organizar equipos, proyectos y eventos de forma clara y eficiente. El objetivo de este es dar continuidad y mantener el contacto con todos los miembros.
+          </p>
+        </div>
+
+        <div id="equipoMiembros">
+          <h3 class="section-line font-semibold text-gray-700 text-sm uppercase tracking-wide mb-4">Integrantes registrados</h3>
+          <div id="equipoListado" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl p-5 border border-dashed border-gray-200 text-center col-span-2">
+              <p class="text-gray-400 text-sm">Cargando integrantes...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="view-dashboard" class="view">
+    <div class="min-h-screen bg-gray-50 pt-10">
+      <div class="bg-polar-950 px-6 py-10">
+        <div class="max-w-5xl mx-auto">
+          <div class="flex items-center gap-3 mb-1">
+            <button onclick="navigateTo('home')" class="text-polar-400 hover:text-white transition text-xs flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+              Inicio
+            </button>
+            <span class="text-white/20 text-xs">/</span>
+            <span class="text-white/60 text-xs">Dashboard</span>
+          </div>
+          <h1 class="font-display text-3xl font-bold text-white">Dashboard</h1>
+          <p class="text-white/45 text-sm mt-1">Resumen general del sistema</p>
+        </div>
+      </div>
+      <main class="max-w-5xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div class="bg-polar-950 rounded-2xl p-5 text-center border border-polar-800">
+            <div class="text-4xl font-display font-bold text-white mb-1" id="dash-miembros">—</div>
+            <div class="text-xs text-polar-400 font-medium uppercase tracking-wide">Miembros</div>
+          </div>
+          <div class="bg-polar-950 rounded-2xl p-5 text-center border border-polar-800">
+            <div class="text-4xl font-display font-bold text-white mb-1" id="dash-proyectos">—</div>
+            <div class="text-xs text-polar-400 font-medium uppercase tracking-wide">Proyectos</div>
+          </div>
+          <div class="bg-polar-950 rounded-2xl p-5 text-center border border-polar-800">
+            <div class="text-4xl font-display font-bold text-white mb-1" id="dash-participaciones">—</div>
+            <div class="text-xs text-polar-400 font-medium uppercase tracking-wide">Participaciones</div>
+          </div>
+          <div class="bg-polar-950 rounded-2xl p-5 text-center border border-polar-800">
+            <div class="text-4xl font-display font-bold text-white mb-1">✦</div>
+            <div class="text-xs text-polar-400 font-medium uppercase tracking-wide">Equipo DoubleSpace</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 class="section-line font-semibold text-gray-700 text-sm uppercase tracking-wide mb-4">Últimos miembros</h3>
+            <div id="dash-ultimos-miembros" class="space-y-2 text-sm text-gray-500">
+              <p class="italic text-xs">Cargando...</p>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h3 class="section-line font-semibold text-gray-700 text-sm uppercase tracking-wide mb-4">Últimos proyectos</h3>
+            <div id="dash-ultimos-proyectos" class="space-y-2 text-sm text-gray-500">
+              <p class="italic text-xs">Cargando...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="modalEliminar" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
       <div class="flex items-center gap-3 mb-3">
         <div class="bg-red-100 p-2 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
-               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858
-                     L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
           </svg>
         </div>
         <h3 class="text-base font-bold text-gray-800">Confirmar eliminación</h3>
       </div>
       <p class="text-sm text-gray-600 mb-5">
-        ¿Estás seguro de que deseas eliminar a
-        <strong id="nombreAEliminar" class="text-gray-900"></strong>?
-        Esta acción no se puede deshacer.
+        ¿Deseas eliminar a <strong id="nombreAEliminar" class="text-gray-900"></strong>? Esta acción no se puede deshacer.
       </p>
       <div class="flex gap-3">
-        <button onclick="cerrarModal()"
-                class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50
-                       font-semibold py-2 rounded-lg text-sm transition">
-          Cancelar
-        </button>
-        <button id="btnConfirmarEliminar"
-                class="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800
-                       text-white font-semibold py-2 rounded-lg text-sm transition">
-          Sí, eliminar
-        </button>
+        <button onclick="cerrarModal()" class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 font-semibold py-2 rounded-xl text-sm transition">Cancelar</button>
+        <button id="btnConfirmarEliminar" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-xl text-sm transition">Sí, eliminar</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL CONFIRMACIÓN ELIMINAR PROYECTO -->
-  <div id="modalEliminarProyecto"
-       class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+  <div id="modalEliminarProyecto" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm px-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
       <div class="flex items-center gap-3 mb-3">
         <div class="bg-red-100 p-2 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
-               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858
-                     L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
           </svg>
         </div>
         <h3 class="text-base font-bold text-gray-800">Confirmar eliminación</h3>
       </div>
       <p class="text-sm text-gray-600 mb-5">
-        ¿Estás seguro de que deseas eliminar el proyecto
-        <strong id="nombreAEliminarProyecto" class="text-gray-900"></strong>?
-        Esta acción no se puede deshacer.
+        ¿Deseas eliminar el proyecto <strong id="nombreAEliminarProyecto" class="text-gray-900"></strong>? Esta acción no se puede deshacer.
       </p>
       <div class="flex gap-3">
-        <button onclick="cerrarModalProyecto()"
-                class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50
-                       font-semibold py-2 rounded-lg text-sm transition">
-          Cancelar
-        </button>
-        <button id="btnConfirmarEliminarProyecto"
-                class="flex-1 bg-red-600 hover:bg-red-700 active:bg-red-800
-                       text-white font-semibold py-2 rounded-lg text-sm transition">
-          Sí, eliminar
-        </button>
+        <button onclick="cerrarModalProyecto()" class="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 font-semibold py-2 rounded-xl text-sm transition">Cancelar</button>
+        <button id="btnConfirmarEliminarProyecto" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-xl text-sm transition">Sí, eliminar</button>
       </div>
     </div>
   </div>
