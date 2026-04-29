@@ -1,3 +1,9 @@
+// ── Mobile Menu ─────────────────────────────────────────────────────────
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  if (menu) menu.classList.toggle('hidden');
+}
+
 // ── Navigation ──────────────────────────────────────────────────────────
 function navigateTo(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -5,9 +11,11 @@ function navigateTo(view) {
 
   const targetView = document.getElementById('view-' + view);
   const targetNav  = document.getElementById('nav-' + view);
+  const targetNavMobile = document.getElementById('nav-' + view + '-mobile');
 
   if (targetView) { targetView.classList.add('active'); window.scrollTo({top:0, behavior:'smooth'}); }
   if (targetNav)  { targetNav.classList.add('active'); }
+  if (targetNavMobile)  { targetNavMobile.classList.add('active'); }
 
   if (view === 'dashboard') cargarDashboard();
   if (view === 'equipo')    cargarEquipo();
