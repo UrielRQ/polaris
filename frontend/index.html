@@ -63,8 +63,13 @@
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
+    @keyframes fadeInAlert {
+      from { opacity: 0; transform: translateX(400px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
 
     .anim-fadeup   { animation: fadeUp 0.6s cubic-bezier(.22,1,.36,1) both; }
+    .animate-fade-in { animation: fadeInAlert 0.3s ease-out; }
     .anim-fadein   { animation: fadeIn 0.5s ease both; }
     .anim-float    { animation: float 6s ease-in-out infinite; }
     .card-anim     { animation: cardIn 0.35s cubic-bezier(.22,1,.36,1) both; }
@@ -266,6 +271,9 @@
     </div>
   </nav>
 
+  <!-- Alert Container -->
+  <div id="alertContainer" class="fixed top-24 right-6 z-40 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
   <div id="view-home" class="view active">
 
     <section class="hero-bg min-h-screen md:min-h-[82svh] flex flex-col items-center justify-center px-6 md:px-8 lg:px-10 pt-24 md:pt-20 lg:pt-24 pb-16 md:pb-12 lg:pb-16 grid-pattern relative">
@@ -463,7 +471,7 @@
 
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div id="modoBanner" class="bg-polar-600 px-5 py-3 flex items-center justify-between">
-              <span id="tituloFormulario" class="text-white font-semibold text-sm">➕ Registrar nuevo miembro</span>
+              <span id="tituloFormulario" class="text-white font-semibold text-sm"> Registrar nuevo miembro</span>
               <button id="btnCancelar" onclick="cancelarEdicion()"
                 class="hidden text-white/70 hover:text-white text-xs underline transition">Cancelar edición</button>
             </div>
@@ -472,13 +480,15 @@
                 <label for="nombreMiembro" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
                   Nombre completo <span class="text-red-400">*</span>
                 </label>
-                <input type="text" id="nombreMiembro" placeholder="Ej. Ana García" autocomplete="off" class="polaris-input" required>
+                <input type="text" id="nombreMiembro" placeholder="Ej. Ana García" autocomplete="off" class="polaris-input" required minlength="7">
+                <p class="text-xs text-gray-400">Mínimo 7 caracteres</p>
               </div>
               <div class="flex flex-col gap-1">
                 <label for="correo" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
                   Correo electrónico <span class="text-red-400">*</span>
                 </label>
                 <input type="email" id="correo" placeholder="Ej. ana@polaris.dev" autocomplete="off" class="polaris-input" required>
+                <p class="text-xs text-gray-400">Formato: ejemplo@dominio.com</p>
               </div>
               <div class="flex flex-col gap-1">
                 <label for="rol" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
@@ -492,6 +502,7 @@
                     Teléfono <span class="text-red-400">*</span>
                   </label>
                   <input type="tel" id="telefono" placeholder="Ej. 5512345678" autocomplete="off" class="polaris-input" required>
+                  <p class="text-xs text-gray-400">10 dígitos</p>
                 </div>
                 <div class="flex flex-col gap-1">
                   <label for="fechaNacimiento" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
@@ -551,7 +562,7 @@
 
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div id="modoBannerProyecto" class="bg-polar-600 px-5 py-3 flex items-center justify-between">
-              <span id="tituloFormProyecto" class="text-white font-semibold text-sm">➕ Registrar nuevo proyecto</span>
+              <span id="tituloFormProyecto" class="text-white font-semibold text-sm"> Registrar nuevo proyecto</span>
               <button id="btnCancelarProyecto" type="button" onclick="cancelarEdicionProyecto()"
                 class="hidden text-white/70 hover:text-white text-xs underline transition">Cancelar edición</button>
             </div>
@@ -560,7 +571,8 @@
                 <label for="nombreProyecto" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">
                   Nombre del proyecto <span class="text-red-400">*</span>
                 </label>
-                <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica" required class="polaris-input">
+                <input id="nombreProyecto" type="text" placeholder="Ej. App de gestión académica" required class="polaris-input" minlength="7">
+                <p class="text-xs text-gray-400">Mínimo 7 caracteres</p>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div class="flex flex-col gap-1">
@@ -574,7 +586,8 @@
               </div>
               <div class="flex flex-col gap-1">
                 <label for="descripcion" class="text-xs font-semibold text-polar-700 uppercase tracking-wide">Descripción <span class="text-red-400">*</span></label>
-                <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…" required class="polaris-input"></textarea>
+                <textarea id="descripcion" rows="3" placeholder="Breve descripción del proyecto…" required class="polaris-input" minlength="7"></textarea>
+                <p class="text-xs text-gray-400">Mínimo 7 caracteres</p>
               </div>
               <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-polar-700 uppercase tracking-wide">

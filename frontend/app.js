@@ -1,3 +1,66 @@
+
+function showAlert(message, type = 'info', duration = 4000) {
+  const alertContainer = document.getElementById('alertContainer');
+  const alert = document.createElement('div');
+  
+  const bgColor = type === 'success' ? 'bg-green-50 border-green-200' : 
+                  type === 'error' ? 'bg-red-50 border-red-200' : 
+                  type === 'warning' ? 'bg-amber-50 border-amber-200' : 
+                  'bg-blue-50 border-blue-200';
+  
+  const textColor = type === 'success' ? 'text-green-700' : 
+                    type === 'error' ? 'text-red-700' : 
+                    type === 'warning' ? 'text-amber-700' : 
+                    'text-blue-700';
+  
+  const iconColor = type === 'success' ? 'text-green-500' : 
+                    type === 'error' ? 'text-red-500' : 
+                    type === 'warning' ? 'text-amber-500' : 
+                    'text-blue-500';
+  
+  const icon = type === 'success' ? '✓' : 
+               type === 'error' ? '✕' : 
+               type === 'warning' ? '⚠' : 
+               'ⓘ';
+  
+  alert.className = `${bgColor} ${textColor} border rounded-lg p-4 shadow-lg pointer-events-auto animate-fade-in transition-all duration-300 flex items-center gap-3`;
+  alert.innerHTML = `
+    <span class="flex-shrink-0 w-6 h-6 flex items-center justify-center font-bold text-lg ${iconColor}">${icon}</span>
+    <span class="flex-1 text-sm font-medium">${message}</span>
+    <button onclick="this.parentElement.remove()" class="flex-shrink-0 text-xl opacity-50 hover:opacity-100 transition">&times;</button>
+  `;
+  
+  alertContainer.appendChild(alert);
+  
+  if (duration > 0) {
+    setTimeout(() => {
+      alert.style.opacity = '0';
+      alert.style.transform = 'translateX(400px)';
+      setTimeout(() => alert.remove(), 300);
+    }, duration);
+  }
+}
+
+
+function validarEmail(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+function validarTelefono(telefono) {
+  const regex = /^\d{10}$/;
+  return regex.test(telefono.replace(/[-\s]/g, ''));
+}
+
+function validarCamposObligatorios(campos) {
+  for (let [nombre, valor] of Object.entries(campos)) {
+    if (!valor || valor.trim() === '') {
+      return { valido: false, campo: nombre };
+    }
+  }
+  return { valido: true };
+}
+
 // ── Mobile Menu ─────────────────────────────────────────────────────────
 function toggleMobileMenu() {
   const menu = document.getElementById('mobileMenu');
@@ -47,7 +110,7 @@ function formatearFecha(fechaISO) {
 
 // ── Form mode helpers ────────────────────────────────────────────────────
 function setModoRegistro() {
-  document.getElementById('tituloFormulario').textContent = '➕ Registrar nuevo miembro';
+  document.getElementById('tituloFormulario').textContent = ' Registrar nuevo miembro';
   document.getElementById('textoBotonMiembro').textContent = 'Registrar miembro';
   document.getElementById('btnCancelar').classList.add('hidden');
   document.getElementById('modoBanner').className = 'bg-polar-600 px-5 py-3 flex items-center justify-between';
@@ -61,7 +124,7 @@ function setModoEdicion(nombre) {
 function cancelarEdicion() { editandoId = null; form.reset(); setModoRegistro(); }
 
 function setModoRegistroProyecto() {
-  document.getElementById('tituloFormProyecto').textContent = '➕ Registrar nuevo proyecto';
+  document.getElementById('tituloFormProyecto').textContent = ' Registrar nuevo proyecto';
   document.getElementById('btnProyecto').innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>Crear proyecto`;
   document.getElementById('btnCancelarProyecto').classList.add('hidden');
   document.getElementById('modoBannerProyecto').className = 'bg-polar-600 px-5 py-3 flex items-center justify-between';
@@ -103,6 +166,7 @@ function abrirModalProyecto(id, nombre) {
   const m = document.getElementById('modalEliminarProyecto');
   m.classList.remove('hidden'); m.classList.add('flex');
 }
+
 function cerrarModalProyecto() {
   idAEliminarProyecto = null;
   const m = document.getElementById('modalEliminarProyecto');
@@ -111,13 +175,33 @@ function cerrarModalProyecto() {
 
 document.getElementById('btnConfirmarEliminar').addEventListener('click', async () => {
   if (!idAEliminar) return;
-  await fetch(`http://localhost:3000/miembros/${idAEliminar}`, { method: 'DELETE' });
-  cerrarModal(); cargarMiembros();
+  try {
+    const res = await fetch(`http://localhost:3000/miembros/${idAEliminar}`, { method: 'DELETE' });
+    if (res.ok) {
+      showAlert('Miembro eliminado correctamente', 'success');
+    } else {
+      showAlert('No se pudo eliminar el miembro', 'error');
+    }
+  } catch (error) {
+    showAlert('Error al conectar con el servidor', 'error');
+  }
+  cerrarModal();
+  cargarMiembros();
 });
 document.getElementById('btnConfirmarEliminarProyecto').addEventListener('click', async () => {
   if (!idAEliminarProyecto) return;
-  await fetch(`http://localhost:3000/proyectos/${idAEliminarProyecto}`, { method: 'DELETE' });
-  cerrarModalProyecto(); cargarProyectos();
+  try {
+    const res = await fetch(`http://localhost:3000/proyectos/${idAEliminarProyecto}`, { method: 'DELETE' });
+    if (res.ok) {
+      showAlert('Proyecto eliminado correctamente', 'success');
+    } else {
+      showAlert('No se pudo eliminar el proyecto', 'error');
+    }
+  } catch (error) {
+    showAlert('Error al conectar con el servidor', 'error');
+  }
+  cerrarModalProyecto();
+  cargarProyectos();
 });
 document.getElementById('modalEliminar').addEventListener('click', e => { if (e.target===e.currentTarget) cerrarModal(); });
 document.getElementById('modalEliminarProyecto').addEventListener('click', e => { if (e.target===e.currentTarget) cerrarModalProyecto(); });
@@ -126,20 +210,87 @@ document.getElementById('miembros')?.addEventListener('change', actualizarValida
 // ── CRUD Miembros ────────────────────────────────────────────────────────
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const data = {
-    nombre: document.getElementById('nombreMiembro').value.trim(),
-    correo: document.getElementById('correo').value.trim(),
-    rol: document.getElementById('rol').value.trim(),
-    telefono: document.getElementById('telefono').value.trim(),
-    fechaNacimiento: document.getElementById('fechaNacimiento').value,
-  };
-  if (editandoId) {
-    await fetch(`http://localhost:3000/miembros/${editandoId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-    editandoId = null; setModoRegistro();
-  } else {
-    await fetch('http://localhost:3000/miembros', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+  const nombre = document.getElementById('nombreMiembro').value.trim();
+  const correo = document.getElementById('correo').value.trim();
+  const rol = document.getElementById('rol').value.trim();
+  const telefono = document.getElementById('telefono').value.trim();
+  const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+
+  // Validaciones
+  if (!nombre) {
+    showAlert('El nombre es obligatorio', 'error');
+    return;
   }
-  form.reset(); cargarMiembros();
+  if (nombre.length < 7) {
+    showAlert('El nombre debe tener al menos 7 caracteres', ' error');
+    return;
+  }
+  if (!correo) {
+    showAlert('El correo es obligatorio', 'error');
+    return;
+  }
+  if (!validarEmail(correo)) {
+    showAlert('Ingrese un correo electrónico válido', 'error');
+    return;
+  }
+  if (!rol) {
+    showAlert('El rol es obligatorio', 'error');
+    return;
+  }
+  if (!telefono) {
+    showAlert('El teléfono es obligatorio', 'error');
+    return;
+  }
+  if (!validarTelefono(telefono)) {
+    showAlert('Ingrese un teléfono válido (10 dígitos)', 'error');
+    return;
+  }
+  if (!fechaNacimiento) {
+    showAlert('La fecha de nacimiento es obligatoria', 'error');
+    return;
+  }
+
+  const data = {
+    nombre,
+    correo,
+    rol,
+    telefono,
+    fechaNacimiento,
+  };
+
+  try {
+    if (editandoId) {
+      const res = await fetch(`http://localhost:3000/miembros/${editandoId}`, { 
+        method:'PUT', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify(data) 
+      });
+      if (res.ok) {
+        showAlert('Miembro actualizado correctamente', 'success');
+        editandoId = null;
+        setModoRegistro();
+      } else {
+        showAlert('No se pudo actualizar el miembro', 'error');
+      }
+    } else {
+      const res = await fetch('http://localhost:3000/miembros', { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify(data) 
+      });
+      if (res.ok) {
+        showAlert('Miembro registrado correctamente', 'success');
+      } else {
+        showAlert('No se pudo guardar el miembro', 'error');
+        return;
+      }
+    }
+    form.reset();
+    cargarMiembros();
+  } catch (error) {
+    showAlert('Error al conectar con el servidor', 'error');
+    console.error(error);
+  }
 });
 
 async function cargarMiembros() {
@@ -230,29 +381,102 @@ function escapar(str) { return String(str||'').replace(/'/g,"\\'"); }
 
 // ── CRUD Proyectos ────────────────────────────────────────────────────────
 async function crearProyecto() {
+  const nombre = document.getElementById('nombreProyecto').value.trim();
+  const tipo = document.getElementById('tipo').value.trim();
+  const fecha = document.getElementById('fecha').value;
+  const descripcion = document.getElementById('descripcion').value.trim();
+  
+  // Validaciones
+  if (!nombre) {
+    showAlert('El nombre del proyecto es obligatorio', 'error');
+    return;
+  }
+  if (nombre.length < 7) {
+    showAlert('El nombre del proyecto debe tener al menos 7 caracteres', ' error');
+    return;
+  }
+  if (!tipo) {
+    showAlert('El tipo de proyecto es obligatorio', 'error');
+    return;
+  }
+  if (!fecha) {
+    showAlert('La fecha es obligatoria', 'error');
+    return;
+  }
+  if (!descripcion) {
+    showAlert('La descripción es obligatoria', 'error');
+    return;
+  }
+  if (descripcion.length < 5) {
+    showAlert('La descripción debe tener al menos 5 caracteres', ' error');
+    return;
+  }
+
   const checkboxes = document.querySelectorAll('#miembros input[type=checkbox]:checked');
   const participantes = Array.from(checkboxes).map(cb => parseInt(cb.value));
+  
+  if (participantes.length === 0) {
+    showAlert('Selecciona al menos un participante', 'error');
+    return;
+  }
+
   const data = {
-    nombre: document.getElementById('nombreProyecto').value.trim(),
-    tipo:   document.getElementById('tipo').value.trim(),
-    fecha:  document.getElementById('fecha').value,
-    descripcion: document.getElementById('descripcion').value.trim(),
+    nombre,
+    tipo,
+    fecha,
+    descripcion,
     participantes,
   };
-  if (!data.nombre) return;
-  if (editandoProyectoId) {
-    await fetch(`http://localhost:3000/proyectos/${editandoProyectoId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-    editandoProyectoId = null; setModoRegistroProyecto();
-  } else {
-    await fetch('http://localhost:3000/proyectos', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+
+  try {
+    if (editandoProyectoId) {
+      const res = await fetch(`http://localhost:3000/proyectos/${editandoProyectoId}`, { 
+        method:'PUT', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify(data) 
+      });
+      if (res.ok) {
+        showAlert('Proyecto actualizado correctamente', 'success');
+        editandoProyectoId = null;
+        setModoRegistroProyecto();
+      } else {
+        showAlert('No se pudo actualizar el proyecto', 'error');
+        return;
+      }
+    } else {
+      const res = await fetch('http://localhost:3000/proyectos', { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body:JSON.stringify(data) 
+      });
+      if (res.ok) {
+        showAlert('Proyecto creado correctamente', 'success');
+      } else {
+        showAlert('No se pudo guardar el proyecto', 'error');
+        return;
+      }
+    }
+    formProyecto.reset();
+    document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => cb.checked = false);
+    actualizarValidacionParticipantes();
+    cargarProyectos();
+  } catch (error) {
+    showAlert('Error al conectar con el servidor', 'error');
+    console.error(error);
   }
-  formProyecto.reset();
-  document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => cb.checked = false);
-  actualizarValidacionParticipantes(); cargarProyectos();
 }
 
 formProyecto.addEventListener('submit', async (e) => {
-  e.preventDefault(); actualizarValidacionParticipantes();
+  e.preventDefault();
+  
+  // Validar que haya al menos un participante seleccionado
+  const participantesSeleccionados = document.querySelectorAll('#miembros input[type=checkbox]:checked').length;
+  if (participantesSeleccionados === 0) {
+    showAlert('Selecciona al menos un participante', 'error');
+    return;
+  }
+  
+  actualizarValidacionParticipantes();
   if (!formProyecto.checkValidity()) { formProyecto.reportValidity(); return; }
   await crearProyecto();
 });
@@ -338,7 +562,7 @@ async function cargarProyectos() {
   return data;
 }
 
-// ── Equipo view ──────────────────────────────────────────────────────────
+
 async function cargarEquipo() {
   let data = [];
   try { const r = await fetch('http://localhost:3000/miembros'); data = await r.json(); } catch(e) {}
@@ -367,7 +591,7 @@ async function cargarEquipo() {
   });
 }
 
-// ── Dashboard ────────────────────────────────────────────────────────────
+
 async function cargarDashboard() {
   let miembros = [], proyectos = [];
   try { miembros = await (await fetch('http://localhost:3000/miembros')).json(); } catch(e){}
@@ -410,6 +634,6 @@ async function cargarDashboard() {
   }
 }
 
-// ── Init ─────────────────────────────────────────────────────────────────
+
 cargarMiembros();
 cargarProyectos();
