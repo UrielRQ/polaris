@@ -9,7 +9,7 @@ let miembros = []; // simulando base de datos
 
 let proyectos = []; // nueva "base de datos"
 
-// CREATE (POST)
+// CREATE (POST) MIEMBROS
 app.post('/miembros', (req, res) => {
     const { nombre, correo, rol, telefono, fechaNacimiento } = req.body;
 
@@ -26,7 +26,7 @@ app.post('/miembros', (req, res) => {
     res.json(nuevo);
 });
 
-// READ (GET)
+// READ (GET) MIEMBROS
 app.get('/miembros', (req, res) => {
     res.json(miembros);
 });
@@ -35,7 +35,7 @@ app.listen(3000, () => {
     console.log('Servidor corriendo en http://localhost:3000');
 });
 
-// UPDATE (PUT)
+// UPDATE (PUT) MIEMBROS
 app.put('/miembros/:id', (req, res) => {
     const { id } = req.params;
     const { nombre, correo, rol, telefono, fechaNacimiento } = req.body;
@@ -55,7 +55,7 @@ app.put('/miembros/:id', (req, res) => {
     res.json(miembro);
 });
 
-// DELETE
+// DELETE MIEMBROS
 app.delete('/miembros/:id', (req, res) => {
     const { id } = req.params;
 
@@ -83,7 +83,7 @@ app.post('/proyectos', (req, res) => {
 
 // READ PROYECTOS
 app.get('/proyectos', (req, res) => {
-    // Opcional: enriquecer con info de miembros
+    //  info de miembros
     const resultado = proyectos.map(p => {
         const participantesInfo = miembros.filter(m =>
             p.participantes.includes(m.id)

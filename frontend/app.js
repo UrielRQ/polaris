@@ -1,7 +1,12 @@
 
 function showAlert(message, type = 'info', duration = 4000) {
   const alertContainer = document.getElementById('alertContainer');
-  const alert = document.createElement('div');
+
+// Elimina alertas anteriores del mismo tipo
+alertContainer.querySelectorAll(`[data-alert-type="${type}"]`).forEach(el => el.remove());
+
+const alert = document.createElement('div');
+alert.setAttribute('data-alert-type', type);
   
   const bgColor = type === 'success' ? 'bg-green-50 border-green-200' : 
                   type === 'error' ? 'bg-red-50 border-red-200' : 
@@ -42,14 +47,34 @@ function showAlert(message, type = 'info', duration = 4000) {
 }
 
 
+
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 }
 
+function validarNombre(nombre) {
+  const regex = /^[A-Za-z\s]+$/;
+  return regex.test(nombre);
+}
+
 function validarTelefono(telefono) {
   const regex = /^\d{10}$/;
   return regex.test(telefono.replace(/[-\s]/g, ''));
+}
+
+function validarFecha(fecha) {
+  const f = new Date(`${fecha}T00:00:00`);
+  return !isNaN(f);
+}
+
+function validarNombreProyecto(nombre) {
+  const regex = /^[A-Za-z\s 0-9]+$/;
+  return regex.test(nombre);
+}
+
+function validarParticipantes(participantes) {
+  return Array.isArray(participantes) && participantes.length > 0;
 }
 
 function validarCamposObligatorios(campos) {
@@ -61,13 +86,13 @@ function validarCamposObligatorios(campos) {
   return { valido: true };
 }
 
-// ── Mobile Menu ─────────────────────────────────────────────────────────
+// menu en pantallas pequeñas
 function toggleMobileMenu() {
   const menu = document.getElementById('mobileMenu');
   if (menu) menu.classList.toggle('hidden');
 }
 
-// ── Navigation ──────────────────────────────────────────────────────────
+// modo de navegación
 function navigateTo(view) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
@@ -84,7 +109,7 @@ function navigateTo(view) {
   if (view === 'equipo')    cargarEquipo();
 }
 
-// ── State ────────────────────────────────────────────────────────────────
+// colores de estados
 const form = document.getElementById('formMiembro');
 const formProyecto = document.getElementById('formProyecto');
 let editandoId = null, editandoProyectoId = null;
@@ -108,7 +133,7 @@ function formatearFecha(fechaISO) {
   return `${String(f.getDate()).padStart(2,'0')}/${String(f.getMonth()+1).padStart(2,'0')}/${f.getFullYear()}`;
 }
 
-// ── Form mode helpers ────────────────────────────────────────────────────
+// formulario de miembros
 function setModoRegistro() {
   document.getElementById('tituloFormulario').textContent = ' Registrar nuevo miembro';
   document.getElementById('textoBotonMiembro').textContent = 'Registrar miembro';
@@ -150,12 +175,19 @@ function actualizarValidacionParticipantes() {
   pi.setCustomValidity(sel > 0 ? '' : 'Selecciona al menos un participante.');
 }
 
-// ── Modals ───────────────────────────────────────────────────────────────
+// ejecutar validación cada vez que cambien los checkboxes de participantes
+document.addEventListener('change', (e) => {
+  if (e.target.closest('#miembros input[type=checkbox]')) {
+    actualizarValidacionParticipantes();
+  }
+});
+
 function abrirModal(id, nombre) {
   idAEliminar = id; document.getElementById('nombreAEliminar').textContent = nombre;
   const m = document.getElementById('modalEliminar');
   m.classList.remove('hidden'); m.classList.add('flex');
 }
+
 function cerrarModal() {
   idAEliminar = null;
   const m = document.getElementById('modalEliminar');
@@ -207,7 +239,7 @@ document.getElementById('modalEliminar').addEventListener('click', e => { if (e.
 document.getElementById('modalEliminarProyecto').addEventListener('click', e => { if (e.target===e.currentTarget) cerrarModalProyecto(); });
 document.getElementById('miembros')?.addEventListener('change', actualizarValidacionParticipantes);
 
-// ── CRUD Miembros ────────────────────────────────────────────────────────
+// CRUD de miembros
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nombre = document.getElementById('nombreMiembro').value.trim();
@@ -221,6 +253,11 @@ form.addEventListener('submit', async (e) => {
     showAlert('El nombre es obligatorio', 'error');
     return;
   }
+  if (!validarNombre(nombre)) {
+    showAlert('Ingrese un nombre valido (solo letras)', 'error');
+    return;
+  }
+
   if (nombre.length < 7) {
     showAlert('El nombre debe tener al menos 7 caracteres', ' error');
     return;
@@ -246,6 +283,10 @@ form.addEventListener('submit', async (e) => {
     return;
   }
   if (!fechaNacimiento) {
+    showAlert('La fecha de nacimiento es obligatoria', 'error');
+    return;
+  }
+  if (!validarFecha(fechaNacimiento)) {
     showAlert('La fecha de nacimiento es obligatoria', 'error');
     return;
   }
@@ -286,6 +327,7 @@ form.addEventListener('submit', async (e) => {
       }
     }
     form.reset();
+    document.querySelectorAll('#formMiembro .polaris-input').forEach(el => clearInputState(el));
     cargarMiembros();
   } catch (error) {
     showAlert('Error al conectar con el servidor', 'error');
@@ -343,7 +385,7 @@ async function cargarMiembros() {
     });
   }
 
-  // Update participant checkboxes in project form
+  // Update de la sección de creación/edición de proyectos con los miembros disponibles
   const miembrosDiv = document.getElementById('miembros');
   if (miembrosDiv) {
     if (data.length === 0) {
@@ -379,7 +421,7 @@ function editar(id, nombre, correo, rol, telefono, fechaNacimiento) {
 
 function escapar(str) { return String(str||'').replace(/'/g,"\\'"); }
 
-// ── CRUD Proyectos ────────────────────────────────────────────────────────
+// CRUD de proyectos 
 async function crearProyecto() {
   const nombre = document.getElementById('nombreProyecto').value.trim();
   const tipo = document.getElementById('tipo').value.trim();
@@ -390,6 +432,10 @@ async function crearProyecto() {
   if (!nombre) {
     showAlert('El nombre del proyecto es obligatorio', 'error');
     return;
+  }
+  if (!validarNombreProyecto(nombre)) {
+    showAlert('El nombre del proyecto es obligatorio', 'error');
+      return;
   }
   if (nombre.length < 7) {
     showAlert('El nombre del proyecto debe tener al menos 7 caracteres', ' error');
@@ -415,7 +461,7 @@ async function crearProyecto() {
   const checkboxes = document.querySelectorAll('#miembros input[type=checkbox]:checked');
   const participantes = Array.from(checkboxes).map(cb => parseInt(cb.value));
   
-  if (participantes.length === 0) {
+  if ((!validarParticipantes(participantes)) || participantes.length === 0) {
     showAlert('Selecciona al menos un participante', 'error');
     return;
   }
@@ -457,7 +503,9 @@ async function crearProyecto() {
       }
     }
     formProyecto.reset();
+    document.querySelectorAll('#formProyecto .polaris-input').forEach(el => clearInputState(el));
     document.querySelectorAll('#miembros input[type=checkbox]').forEach(cb => cb.checked = false);
+    document.getElementById('contadorSeleccionados').textContent = '0';
     actualizarValidacionParticipantes();
     cargarProyectos();
   } catch (error) {
@@ -469,15 +517,14 @@ async function crearProyecto() {
 formProyecto.addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Validar que haya al menos un participante seleccionado
+  // Validar participantes primero (antes que cualquier otra validación)
   const participantesSeleccionados = document.querySelectorAll('#miembros input[type=checkbox]:checked').length;
   if (participantesSeleccionados === 0) {
-    showAlert('Selecciona al menos un participante', 'error');
+    showAlert('Debe seleccionar al menos un miembro', 'error');
     return;
   }
+
   
-  actualizarValidacionParticipantes();
-  if (!formProyecto.checkValidity()) { formProyecto.reportValidity(); return; }
   await crearProyecto();
 });
 
@@ -632,6 +679,63 @@ async function cargarDashboard() {
           </div>
         </div>`).join('');
   }
+}
+
+// validaciones en tiempo real 
+  function setInputState(el, isValid) {
+    el.classList.remove('input-error', 'input-success');
+    el.classList.add(isValid ? 'input-success' : 'input-error');
+}
+
+  function clearInputState(el) {
+    el.classList.remove('input-error', 'input-success');
+}
+
+  function attachValidation(id, validatorFn, minLen) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const validate = () => {
+    const val = el.value.trim();
+    if (!val) { clearInputState(el); return; }
+    let valid = validatorFn(val);
+    if (valid && minLen && val.length < minLen) valid = false;
+    setInputState(el, valid);
+  };
+  el.addEventListener('input', validate);
+  el.addEventListener('blur', validate);
+}
+
+// Miembro fields
+  attachValidation('nombreMiembro', (v) => /^[A-Za-z\sáéíóúÁÉÍÓÚñÑ]+$/.test(v), 7);
+  attachValidation('correo', (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+  attachValidation('rol', (v) => v.length >= 2);
+  attachValidation('telefono', (v) => /^\d{10}$/.test(v.replace(/[-\s]/g, '')));
+
+  const fechaNacEl = document.getElementById('fechaNacimiento');
+  if (fechaNacEl) {
+  const vFn = () => {
+    const v = fechaNacEl.value;
+    if (!v) { clearInputState(fechaNacEl); return; }
+    setInputState(fechaNacEl, !isNaN(new Date(v + 'T00:00:00')));
+  };
+  fechaNacEl.addEventListener('change', vFn);
+  fechaNacEl.addEventListener('blur', vFn);
+}
+
+// campos de proyectos
+  attachValidation('nombreProyecto', (v) => /^[A-Za-z\s0-9áéíóúÁÉÍÓÚñÑ]+$/.test(v) && v.length >= 7, 7);
+  attachValidation('tipo', (v) => v.length >= 2);
+  attachValidation('descripcion', (v) => v.length >= 7, 7);
+
+  const fechaPrEl = document.getElementById('fecha');
+  if (fechaPrEl) {
+  const vFn2 = () => {
+    const v = fechaPrEl.value;
+    if (!v) { clearInputState(fechaPrEl); return; }
+    setInputState(fechaPrEl, !isNaN(new Date(v + 'T00:00:00')));
+  };
+  fechaPrEl.addEventListener('change', vFn2);
+  fechaPrEl.addEventListener('blur', vFn2);
 }
 
 
